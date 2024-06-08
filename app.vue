@@ -2,7 +2,10 @@
   <UContainer>
     <UCard class="mt-0">
       <div class="flex justify-between items-center">
-        <h1 class="text-primary-500 font-bold text-2xl">CSV to SQLite</h1>
+        <div>
+          <h1 class="text-primary-500 font-bold text-2xl">CSV to SQLite</h1>
+          <h2 class="italic">Turn your CSV file into a database</h2>
+        </div>
         <ColorScheme><USelect v-model="$colorMode.preference" :options="['system', 'light', 'dark']" /></ColorScheme>
         </div>
         <template #footer>
@@ -10,6 +13,7 @@
             <li>💻 100% local</li>
             <li>🚫 No data sent to server</li>
             <li>👤 Private and anonymous</li>
+            <li>👁️ No tracking</li>
             <li>👁️ No tracking</li>
           </ul>
       </template>
