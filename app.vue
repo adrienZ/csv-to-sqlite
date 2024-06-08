@@ -1,13 +1,18 @@
 <template>
   <UContainer>
     <UCard class="mt-0">
-      <!-- <template #header> -->
-        <div class="flex justify-between items-center">
-          <h1 class="text-primary-500 font-bold text-2xl">CSV to SQLite</h1>
-          <ColorScheme><USelect v-model="$colorMode.preference" :options="['system', 'light', 'dark']" /></ColorScheme>
+      <div class="flex justify-between items-center">
+        <h1 class="text-primary-500 font-bold text-2xl">CSV to SQLite</h1>
+        <ColorScheme><USelect v-model="$colorMode.preference" :options="['system', 'light', 'dark']" /></ColorScheme>
         </div>
-      <!-- </template> -->
-      <!-- <UButton icon="i-heroicons-book-open" to="https://ui.nuxt.com" target="_blank">Open Nuxt UI Documentation</UButton> -->
+        <template #footer>
+          <ul>
+            <li>💻 100% local</li>
+            <li>🚫 No data sent to server</li>
+            <li>👤 Private and anonymous</li>
+            <li>👁️ No tracking</li>
+          </ul>
+      </template>
     </UCard>
 
     <div class="mt-20 flex justify-centers">
