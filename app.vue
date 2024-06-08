@@ -10,10 +10,10 @@
         </div>
         <template #footer>
           <ul>
-            <li>💻 100% local</li>
-            <li>🚫 No data sent to server</li>
-            <li>👤 Private and anonymous</li>
-            <li>👁️ No tracking</li>
+            <li>💻 &nbsp;100% local</li>
+            <li>🚫 &nbsp;No data sent to server</li>
+            <li>👤 &nbsp;Private and anonymous</li>
+            <li>👁️ &nbsp;No tracking</li>
           </ul>
       </template>
     </UCard>
