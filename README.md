@@ -1,5 +1,8 @@
 # Nuxt UI Minimal Starter
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/648b8eaa-b44f-4ef2-afd9-c426ac60159d/deploy-status)](https://app.netlify.com/sites/csv-to-sqlite/deploys)
+
+
 Look at [Nuxt docs](https://nuxt.com/docs/getting-started/introduction) and [Nuxt UI docs](https://ui.nuxt.com) to learn more.
 
 ## Setup
