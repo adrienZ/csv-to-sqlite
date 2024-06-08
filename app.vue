@@ -3,7 +3,7 @@
     <UCard class="mt-0">
       <!-- <template #header> -->
         <div class="flex justify-between items-center">
-          <h1>CSV to SQLite</h1>
+          <h1 class="text-primary-500 font-bold text-2xl">CSV to SQLite</h1>
           <ColorScheme><USelect v-model="$colorMode.preference" :options="['system', 'light', 'dark']" /></ColorScheme>
         </div>
       <!-- </template> -->
@@ -11,7 +11,7 @@
     </UCard>
 
     <div class="mt-20 flex justify-centers">
-    <input v-if="!exportedUrl" type="file" accept=".csv" class="mx-auto px-6 py-4 rounded-md border-2 border-primary-500 text-primary-500" @input="handleFileInput" />
+    <input v-if="!exportedUrl" type="file" accept=".csv" class="mx-auto px-6 py-4 rounded-md border-4 border-primary-500 text-primary-500" @input="handleFileInput" />
     <UButton
       v-else
       icon="i-heroicons-arrow-down-tray"
