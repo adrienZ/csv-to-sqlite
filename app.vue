@@ -14,7 +14,6 @@
             <li>🚫 No data sent to server</li>
             <li>👤 Private and anonymous</li>
             <li>👁️ No tracking</li>
-            <li>👁️ No tracking</li>
           </ul>
       </template>
     </UCard>
