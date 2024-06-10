@@ -98,7 +98,6 @@ async function handleRawCsv(rawCsvData: unknown[][]) {
 
   const columns = headers.map(header => `'${toSnakeCase(header)}' TEXT`).join(', ');
   const createTableSql = `CREATE TABLE IF NOT EXISTS ${MY_TABLE_NAME} (${columns})`;
-  console.log(createTableSql);
   db.run(createTableSql)
 
   rows.forEach(row => {
