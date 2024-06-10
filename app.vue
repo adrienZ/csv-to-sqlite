@@ -88,7 +88,6 @@ function sanitizeValue(value: string): string {
 
 async function handleRawCsv(rawCsvData: unknown[][]) {
   const [headers, ...rows] = rawCsvData;
-
   const SQL = await initSqlite({
     locateFile() {
       return sqlWasmUrl
@@ -97,8 +96,9 @@ async function handleRawCsv(rawCsvData: unknown[][]) {
 
   const db = new SQL.Database();
 
-  const columns = headers.map(header => `${toSnakeCase(header)} TEXT`).join(', ');
+  const columns = headers.map(header => `'${toSnakeCase(header)}' TEXT`).join(', ');
   const createTableSql = `CREATE TABLE IF NOT EXISTS ${MY_TABLE_NAME} (${columns})`;
+  console.log(createTableSql);
   db.run(createTableSql)
 
   rows.forEach(row => {
