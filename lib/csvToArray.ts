@@ -28,7 +28,7 @@
  */
 
 interface CsvToArrayOptions {
-    fSep?: string;
+    fSep?: string[];
     rSep?: string;
     quot?: string;
     head?: boolean;
@@ -37,7 +37,7 @@ interface CsvToArrayOptions {
 
 export function csvToArray(input: string, options?: CsvToArrayOptions): string[][] {
     const defaultOptions: CsvToArrayOptions = {
-        fSep: ',',
+        fSep: [',', ';'],
         rSep: '\r\n',
         quot: '"',
         head: false,
@@ -63,18 +63,13 @@ export function csvToArray(input: string, options?: CsvToArrayOptions): string[]
                     quote ^= 1;
                 }
                 break;
-            case opts.fSep:
-                if (!quote) {
+            default:
+                if (opts.fSep.includes(char) && !quote) {
                     if (opts.trim) {
                         array[row][field] = array[row][field].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
                     }
                     array[row][++field] = '';
-                } else {
-                    array[row][field] += char;
-                }
-                break;
-            case opts.rSep.charAt(0):
-                if (!quote && (!opts.rSep.charAt(1) || (opts.rSep.charAt(1) && opts.rSep.charAt(1) === input.charAt(i + 1)))) {
+                } else if (opts.rSep.charAt(0) === char && !quote && (!opts.rSep.charAt(1) || (opts.rSep.charAt(1) && opts.rSep.charAt(1) === input.charAt(i + 1)))) {
                     if (opts.trim) {
                         array[row][field] = array[row][field].replace(/^\s\s*/, '').replace(/\s\s*$/, '');
                     }
@@ -86,9 +81,6 @@ export function csvToArray(input: string, options?: CsvToArrayOptions): string[]
                 } else {
                     array[row][field] += char;
                 }
-                break;
-            default:
-                array[row][field] += char;
         }
     }
 
