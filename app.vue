@@ -1,5 +1,11 @@
 <template>
   <UContainer>
+    <Head>
+      <title>CSV to SQLite</title>
+      <meta value="description" content="Turn your CSV file into a database" />
+    </Head>
+
+
     <UCard class="mt-0">
       <div class="flex justify-between items-center">
         <div>
@@ -27,8 +33,18 @@
         variant="solid" prefecth label="Download your SQLite database" :trailing="false" download="export.sqlite" />
     </div>
     <div class="overflow-auto mt-10">
-      <!-- <h3 class="text-2xl font-black text-center mb-4 tracking-wide">Preview</h3> -->
-      <UTable :rows="tableData" :loading="isLoading" />
+      <UTable
+        :columns="tableHeaders"
+        :rows="paginatedRows"
+        :loading="isLoading"
+      />
+      <div class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700">
+        <UPagination
+          v-model="currentPage"
+          :page-count="currentPageSize"
+          :total="tableData?.length ?? 0"
+        />
+      </div>
     </div>
 
   </UContainer>
@@ -36,15 +52,19 @@
 
 
 <script setup lang="ts">
-import { csvToArray } from './lib/csvToArray';
 import initSqlite from "sql.js";
 import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url'
 import Papa from "papaparse"
+import { useOffsetPagination } from '@vueuse/core'
 // import Sqlstring from "sqlstring"
 
 const exportedUrl = ref<string>()
 const tableData = ref<unknown[]>()
+const tableHeaders = ref<Array<{ key: string, label: string, sortable: true }>>([])
 const isLoading = ref(false);
+const paginatedRows = computed(() => {
+  return tableData.value?.slice((currentPage.value - 1) * currentPageSize.value, (currentPage.value) * currentPageSize.value)
+})
 
 const MY_TABLE_NAME = "imported"
 
@@ -78,7 +98,6 @@ function handleFileInput(event: Event): Promise<string> {
 
   }).finally(() => {
     isLoading.value = false;
-
   });
 }
 
@@ -88,6 +107,7 @@ function sanitizeValue(value: string): string {
 
 async function handleRawCsv(rawCsvData: unknown[][]) {
   const [headers, ...rows] = rawCsvData;
+  tableHeaders.value = headers.map(key => ({ key, label: key, sortable: true }))
   const SQL = await initSqlite({
     locateFile() {
       return sqlWasmUrl
@@ -131,4 +151,7 @@ function createDownloadLink(rawDatabase: Uint8Array) {
   const url = URL.createObjectURL(file);
   exportedUrl.value = url;
 }
+
+const currentPage = ref(1);
+const currentPageSize = ref(20);
 </script>
