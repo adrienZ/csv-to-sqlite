@@ -1,5 +1,6 @@
 <template>
   <UContainer>
+
     <Head>
       <title>CSV to SQLite</title>
       <meta value="description" content="Turn your CSV file into a database" />
@@ -32,18 +33,20 @@
       <UButton v-else icon="i-heroicons-arrow-down-tray" size="xl" :to="exportedUrl" class="mx-auto" color="primary"
         variant="solid" prefecth label="Download your SQLite database" :trailing="false" download="export.sqlite" />
     </div>
+
+
+    <div v-if="queryBuilderReady" class="flex mt-8">
+      <UTextarea class="grow" v-model="directDbQuery">
+      </UTextarea>
+      <UButton @click="queryDb(directDbQuery)">Query database</UButton>
+    </div>
+
+
     <div class="overflow-auto mt-10">
-      <UTable
-        :columns="tableHeaders"
-        :rows="paginatedRows"
-        :loading="isLoading"
-      />
-      <div class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700">
-        <UPagination
-          v-model="currentPage"
-          :page-count="currentPageSize"
-          :total="tableData?.length ?? 0"
-        />
+      <UTable :columns="tableHeaders" :rows="paginatedRows" :loading="isLoading" />
+      <div v-if="tableData && tableData.length > currentPageSize"
+        class="flex justify-end px-3 py-3.5 border-t border-gray-200 dark:border-gray-700">
+        <UPagination v-model="currentPage" :page-count="currentPageSize" :total="tableData?.length ?? 0" />
       </div>
     </div>
 
@@ -56,7 +59,8 @@ import initSqlite from "sql.js";
 import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url'
 import Papa from "papaparse"
 import { useOffsetPagination } from '@vueuse/core'
-// import Sqlstring from "sqlstring"
+import { DuckDbService } from "./lib/DuckDbService";
+import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 
 const exportedUrl = ref<string>()
 const tableData = ref<unknown[]>()
@@ -105,6 +109,11 @@ function sanitizeValue(value: string): string {
   return value.replace(/'/g, "''");
 }
 
+
+const queryBuilderReady = ref(false);
+const directDbQuery = ref(`SELECT * FROM ${MY_TABLE_NAME}`);
+const queryUI = ref<AsyncDuckDBConnection>()
+
 async function handleRawCsv(rawCsvData: unknown[][]) {
   const [headers, ...rows] = rawCsvData;
   tableHeaders.value = headers.map(key => ({ key, label: key, sortable: true }))
@@ -114,6 +123,8 @@ async function handleRawCsv(rawCsvData: unknown[][]) {
     },
   });
 
+
+  const duckDBInit = new DuckDbService().init();
   const db = new SQL.Database();
 
   const columns = headers.map(header => `'${toSnakeCase(header)}' TEXT`).join(', ');
@@ -128,7 +139,7 @@ async function handleRawCsv(rawCsvData: unknown[][]) {
     const values = row.map(v => `'${sanitizeValue(v)}'`).join(", ")
     const placeholder = headers.map(h => `'${toSnakeCase(h)}'`).join(', ')
     const insertSql = `INSERT INTO ${MY_TABLE_NAME} (${placeholder}) VALUES (${values})`;
-    
+
     db.run(insertSql)
   })
 
@@ -143,6 +154,21 @@ async function handleRawCsv(rawCsvData: unknown[][]) {
       }
     }, {})
   })
+
+  duckDBInit.then(async duckDb => {
+    const duckQuery = await duckDb.connect();
+    await duckDb.registerFileText(`${MY_TABLE_NAME}.json`, JSON.stringify(tableData.value))
+    await duckQuery.insertJSONFromPath(`${MY_TABLE_NAME}.json`, { name: MY_TABLE_NAME });
+    queryBuilderReady.value = true;
+    queryUI.value = duckQuery;
+  })
+}
+
+
+async function queryDb(query: string) {
+  const queryResult = await queryUI.value?.query(query)
+  const result = queryResult.toArray().map((row) => row.toJSON());
+  tableData.value = result;
 }
 
 
