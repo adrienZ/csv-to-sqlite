@@ -35,7 +35,7 @@
     </div>
 
 
-    <div v-if="queryBuilderReady" class="flex mt-8">
+    <div v-if="exportedUrl" class="flex mt-8">
       <UTextarea class="grow" v-model="directDbQuery">
       </UTextarea>
       <UButton @click="queryDb(directDbQuery)">Query database</UButton>
@@ -55,12 +55,9 @@
 
 
 <script setup lang="ts">
-import initSqlite from "sql.js";
+import initSqlite, { type Database } from "sql.js";
 import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url'
 import Papa from "papaparse"
-import { useOffsetPagination } from '@vueuse/core'
-import { DuckDbService } from "./lib/DuckDbService";
-import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 
 const exportedUrl = ref<string>()
 const tableData = ref<unknown[]>()
@@ -110,22 +107,20 @@ function sanitizeValue(value: string): string {
 }
 
 
-const queryBuilderReady = ref(false);
-const directDbQuery = ref(`SELECT * FROM ${MY_TABLE_NAME}`);
-const queryUI = ref<AsyncDuckDBConnection>()
+const INITIAL_QUERY = `SELECT * FROM ${MY_TABLE_NAME}`
+const directDbQuery = ref(INITIAL_QUERY);
+let db: Database;
 
 async function handleRawCsv(rawCsvData: unknown[][]) {
   const [headers, ...rows] = rawCsvData;
-  tableHeaders.value = headers.map(key => ({ key, label: key, sortable: true }))
+  tableHeaders.value = headers.map(key => ({ key: toSnakeCase(key), label: toSnakeCase(key), sortable: true }))
   const SQL = await initSqlite({
     locateFile() {
       return sqlWasmUrl
     },
   });
 
-
-  const duckDBInit = new DuckDbService().init();
-  const db = new SQL.Database();
+  db = new SQL.Database();
 
   const columns = headers.map(header => `'${toSnakeCase(header)}' TEXT`).join(', ');
   const createTableSql = `CREATE TABLE IF NOT EXISTS ${MY_TABLE_NAME} (${columns})`;
@@ -146,29 +141,26 @@ async function handleRawCsv(rawCsvData: unknown[][]) {
   const binaryArray = db.export();
   createDownloadLink(binaryArray);
 
-  tableData.value = rows.map(row => {
-    return row.reduce((acc, value, index) => {
-      return {
-        ...acc,
-        [headers[index]]: value,
-      }
-    }, {})
-  })
-
-  duckDBInit.then(async duckDb => {
-    const duckQuery = await duckDb.connect();
-    await duckDb.registerFileText(`${MY_TABLE_NAME}.json`, JSON.stringify(tableData.value))
-    await duckQuery.insertJSONFromPath(`${MY_TABLE_NAME}.json`, { name: MY_TABLE_NAME });
-    queryBuilderReady.value = true;
-    queryUI.value = duckQuery;
-  })
+  queryDb(directDbQuery.value);
 }
 
 
-async function queryDb(query: string) {
-  const queryResult = await queryUI.value?.query(query)
-  const result = queryResult.toArray().map((row) => row.toJSON());
-  tableData.value = result;
+function queryDb(query: string) {
+  const result = db.exec(query).at(0);
+  if (result) {
+    const transformed = transformToSqlResult(result);
+    tableData.value = transformed;
+  }
+}
+
+function transformToSqlResult(data: { columns: string[], values: string[][] }): unknown[] {
+    return data.values.map(valueArray => {
+        const customer: any = {};
+        data.columns.forEach((column, index) => {
+            customer[column] = valueArray[index];
+        });
+        return customer;
+    });
 }
 
 
