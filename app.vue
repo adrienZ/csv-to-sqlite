@@ -3,7 +3,7 @@
 
     <Head>
       <title>CSV to SQLite</title>
-      <meta value="description" content="Turn your CSV file into a database" />
+      <meta name="description" content="Turn your CSV file into a database" />
     </Head>
 
 
