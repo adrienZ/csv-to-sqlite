@@ -22,7 +22,8 @@
           <li>💻 &nbsp;100% local</li>
           <li>🚫 &nbsp;No data sent to server</li>
           <li>👤 &nbsp;Private and anonymous</li>
-          <li>👁️ &nbsp;No tracking</li>
+          <li>👁️ &nbsp;Open source</li>
+          <li><a href="https://github.com/adrienZ/csv-to-sqlite" @click="umTrackEvent('github link')"><UIcon name="uil:github" dynamic class="w-4 mb-1" />&nbsp; <span class="underline">Github</span></a></li>
         </ul>
       </template>
     </UCard>
@@ -31,7 +32,7 @@
       <input v-if="!exportedUrl" type="file" accept=".csv"
         class="mx-auto px-6 py-4 rounded-md border-4 border-primary-500 text-primary-500" @input="handleFileInput" />
       <UButton v-else icon="i-heroicons-arrow-down-tray" size="xl" :to="exportedUrl" class="mx-auto" color="primary"
-        variant="solid" prefecth label="Download your SQLite database" :trailing="false" download="export.sqlite" />
+        variant="solid" prefecth label="Download your SQLite database" :trailing="false" download="export.sqlite" @click="umTrackEvent('download db')" />
     </div>
 
 
@@ -82,6 +83,8 @@ function handleFileInput(event: Event): Promise<string> {
     console.error('No files were selected.');
     throw new Error('No files were selected.');
   }
+
+  umTrackEvent("file processed");
 
   const file = input.files[0];
   console.log(`Selected file: ${file.name}`);

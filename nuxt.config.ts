@@ -2,5 +2,6 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@nuxt/ui"],
-  ssr: false
+  ssr: false,
+  extends: ["nuxt-umami"]
 })
