@@ -176,6 +176,6 @@ function createDownloadLink(rawDatabase: Uint8Array) {
 const currentPage = ref(1);
 const currentPageSize = ref(20);
 
-https://github.com/ijkml/nuxt-umami/issues/102#issuecomment-2112482840
+// https://github.com/ijkml/nuxt-umami/issues/102#issuecomment-2112482840
 onMounted(() => umTrackView())
 </script>
