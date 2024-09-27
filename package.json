@@ -14,7 +14,7 @@
     "@nuxt/ui": "^2.18.4",
     "@types/papaparse": "^5.3.14",
     "@types/sql.js": "^1.4.9",
-    "nuxt": "^3.12.4"
+    "nuxt": "^3.13.2"
   },
   "dependencies": {
     "nuxt-umami": "^2.6.4",
